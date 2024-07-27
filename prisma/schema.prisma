@@ -20,3 +20,17 @@ model User{
   posts     Post[]
   comments  Comment[]
 }
+
+model Post {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String
+  imageUrl    String
+  category    String
+  createdAt   DateTime  @default(now())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  comments    Comment[]
+  upvotes     Int       @default(0)
+  downvotes   Int       @default(0)
+}
