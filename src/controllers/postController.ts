@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import {
-  createPostService,
-  editPostService,
-  deletePostService,
-  getPostsService,
-} from "../services/postService";
+// import {
+//   createPostService,
+//   editPostService,
+//   deletePostService,
+//   getPostsService,
+// } from "../services/postService";
 
 export const createPost = async (req: Request, res: Response) => {
   // Logic for creating a post
