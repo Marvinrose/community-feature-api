@@ -1,9 +1,11 @@
-import { User } from "./types/user";
+import { User, Post, Comment } from "./types/user";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: User; // Make sure your authentication middleware assigns `user` of type `User`
+      user?: User;
+      post?: Post;
+      comment?: Comment; // Make sure your authentication middleware assigns `user` of type `User`
     }
   }
 }
