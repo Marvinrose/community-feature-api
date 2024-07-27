@@ -93,11 +93,40 @@ export const editPost = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
 export const deletePost = async (req: Request, res: Response) => {
-  // Logic for deleting a post
+  try {
+    const postId = parseInt(req.params.id, 10);
+
+    if (!req.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
+    // Find the post to delete
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // Check if the user is authorized to delete this post
+    if (post.userId !== req.user.id) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to delete this post" });
+    }
+
+    // Delete the post
+    await prisma.post.delete({
+      where: { id: post.id },
+    });
+
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    res.status(500).json({ error: "Failed to delete post" });
+  }
 };
 
 export const getPosts = async (req: Request, res: Response) => {
