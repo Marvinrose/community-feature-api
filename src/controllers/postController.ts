@@ -42,16 +42,19 @@ export const createPost = async (req: Request, res: Response) => {
 
 export const editPost = async (req: Request, res: Response) => {
   try {
-    const postId = parseInt(req.params.postId); // Ensure postId is an integer
+    const postId = parseInt(req.params.id, 10); // Change to `req.params.id`
     const { title, content, imageUrl, categoryName } = req.body;
 
-    if (!req.user?.id) {
-      throw new Error("User not authenticated");
-    }
+    console.log("Request Params:", req.params);
+    console.log("Request Body:", req.body);
+    console.log("Parsed postId:", postId);
 
-    // Validate the postId
     if (isNaN(postId)) {
       return res.status(400).json({ error: "Invalid post ID" });
+    }
+
+    if (!req.user?.id) {
+      return res.status(401).json({ error: "User not authenticated" });
     }
 
     // Find the post to update
@@ -90,6 +93,9 @@ export const editPost = async (req: Request, res: Response) => {
   }
 };
 
+
+
+
 export const deletePost = async (req: Request, res: Response) => {
   // Logic for deleting a post
 };
@@ -110,4 +116,3 @@ export const getPosts = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to retrieve posts" });
   }
 };
-
