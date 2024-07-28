@@ -6,8 +6,7 @@ import {
   getPosts,
   upvotePost,
   downvotePost,
-  addComment,
-  getCommentsForPost,
+  
 } from "../controllers/postController";
 
 const router = Router();
@@ -18,7 +17,7 @@ router.delete("/:id", deletePost);
 router.get("/", getPosts);
 router.post("/:id/upvote", upvotePost);
 router.post("/:id/downvote", downvotePost);
-router.post("/:postId/comments", addComment);
-router.get("/:postId/comments", getCommentsForPost);
+// router.post("/:postId/comments", addComment);
+// router.get("/:postId/comments", getCommentsForPost);
 
 export default router;
