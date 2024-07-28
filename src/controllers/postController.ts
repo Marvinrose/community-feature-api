@@ -145,3 +145,115 @@ export const getPosts = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to retrieve posts" });
   }
 };
+
+
+
+export const upvotePost = async (req: Request, res: Response) => {
+  try {
+    const postId = parseInt(req.params.id, 10);
+
+    if (isNaN(postId)) {
+      return res.status(400).json({ error: "Invalid post ID" });
+    }
+
+    // Check if the post exists
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // Increment upvotes
+    const updatedPost = await prisma.post.update({
+      where: { id: postId },
+      data: { upvotes: { increment: 1 } },
+    });
+
+    res
+      .status(200)
+      .json({
+        message: "Post upvoted successfully",
+        upvotes: updatedPost.upvotes,
+      });
+  } catch (error) {
+    console.error("Error upvoting post:", error);
+    res.status(500).json({ error: "Failed to upvote post" });
+  }
+};
+
+
+
+export const downvotePost = async (req: Request, res: Response) => {
+  try {
+    const postId = parseInt(req.params.id, 10);
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    const updatedPost = await prisma.post.update({
+      where: { id: postId },
+      data: {
+        downvotes: post.downvotes + 1,
+      },
+    });
+
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    console.error("Error downvoting post:", error);
+    res.status(500).json({ error: "Failed to downvote post" });
+  }
+};
+
+
+export const addComment = async (req: Request, res: Response) => {
+  try {
+    const postId = parseInt(req.params.postId, 10);
+    const { content, parentId } = req.body;
+
+    if (!req.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
+    const newComment = await prisma.comment.create({
+      data: {
+        content,
+        userId: req.user.id,
+        postId,
+        parentId: parentId ? parseInt(parentId, 10) : undefined,
+      },
+    });
+
+    res.status(201).json(newComment);
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ error: "Failed to add comment" });
+  }
+};
+
+
+export const getCommentsForPost = async (req: Request, res: Response) => {
+  try {
+    const postId = parseInt(req.params.postId, 10);
+
+    const comments = await prisma.comment.findMany({
+      where: { postId },
+      include: {
+        user: { select: { name: true, imageUrl: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    res.status(200).json(comments);
+  } catch (error) {
+    console.error("Error retrieving comments:", error);
+    res.status(500).json({ error: "Failed to retrieve comments" });
+  }
+};
+
