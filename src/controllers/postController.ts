@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import prisma from "../client";
-// import {
-//   createPostService,
-//   editPostService,
-//   deletePostService,
-//   getPostsService,
-// } from "../services/postService";
+
+
+// Helper function to parse query parameters
+const parseQueryParam = (param: string | string[]): string => {
+  return Array.isArray(param) ? param[0] : param;
+};
+
 
 export const createPost = async (req: Request, res: Response) => {
   try {
@@ -131,12 +132,25 @@ export const deletePost = async (req: Request, res: Response) => {
 
 export const getPosts = async (req: Request, res: Response) => {
   try {
+    const sortBy = (req.query.sortBy as string) || "createdAt";
+    const order = (req.query.order as string) === "asc" ? "asc" : "desc";
+    const category = req.query.category as string | undefined;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const whereClause: any = category
+      ? { category: { name: { equals: category } } }
+      : {};
+
     const posts = await prisma.post.findMany({
+      where: whereClause,
       include: {
-        user: { select: { name: true, imageUrl: true } }, // Assuming `imageUrl` exists in `User` model
+        user: { select: { name: true, imageUrl: true } },
         comments: true,
       },
-      orderBy: { createdAt: "desc" }, // Optional: Order by creation date, newest first
+      orderBy: { [sortBy]: order },
+      skip: offset,
+      take: limit,
     });
 
     res.status(200).json(posts);
@@ -198,10 +212,43 @@ export const downvotePost = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json({ message: "Post downvoted successfully", downvotes: updatedPost.downvotes, });
+    res.status(200).json({
+      message: "Post downvoted successfully",
+      downvotes: updatedPost.downvotes,
+    });
   } catch (error) {
     console.error("Error downvoting post:", error);
     res.status(500).json({ error: "Failed to downvote post" });
   }
 };
 
+export const getFilteredSortedPosts = async (req: Request, res: Response) => {
+  try {
+    const {
+      sortBy = "createdAt",
+      order = "desc",
+      category,
+      limit = 10,
+      offset = 0,
+    } = req.query;
+
+    const posts = await prisma.post.findMany({
+      where: category
+        ? { category: { name: { equals: category as string } } }
+        : {},
+      include: {
+        user: { select: { name: true, imageUrl: true } },
+        comments: true,
+        category: true,
+      },
+      orderBy: { [sortBy as string]: order as "asc" | "desc" },
+      skip: parseInt(offset as string, 10),
+      take: parseInt(limit as string, 10),
+    });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
+};

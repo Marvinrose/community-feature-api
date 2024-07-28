@@ -6,7 +6,7 @@ import {
   getPosts,
   upvotePost,
   downvotePost,
-  
+  getFilteredSortedPosts,
 } from "../controllers/postController";
 
 const router = Router();
@@ -17,7 +17,6 @@ router.delete("/:id", deletePost);
 router.get("/", getPosts);
 router.post("/:id/upvote", upvotePost);
 router.post("/:id/downvote", downvotePost);
-// router.post("/:postId/comments", addComment);
-// router.get("/:postId/comments", getCommentsForPost);
+router.get("/posts", getFilteredSortedPosts);
 
 export default router;
