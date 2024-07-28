@@ -146,8 +146,6 @@ export const getPosts = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const upvotePost = async (req: Request, res: Response) => {
   try {
     const postId = parseInt(req.params.id, 10);
@@ -171,19 +169,15 @@ export const upvotePost = async (req: Request, res: Response) => {
       data: { upvotes: { increment: 1 } },
     });
 
-    res
-      .status(200)
-      .json({
-        message: "Post upvoted successfully",
-        upvotes: updatedPost.upvotes,
-      });
+    res.status(200).json({
+      message: "Post upvoted successfully",
+      upvotes: updatedPost.upvotes,
+    });
   } catch (error) {
     console.error("Error upvoting post:", error);
     res.status(500).json({ error: "Failed to upvote post" });
   }
 };
-
-
 
 export const downvotePost = async (req: Request, res: Response) => {
   try {
@@ -204,13 +198,12 @@ export const downvotePost = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json(updatedPost);
+    res.status(200).json({ message: "Post downvoted successfully", downvotes: updatedPost.downvotes, });
   } catch (error) {
     console.error("Error downvoting post:", error);
     res.status(500).json({ error: "Failed to downvote post" });
   }
 };
-
 
 export const addComment = async (req: Request, res: Response) => {
   try {
@@ -237,7 +230,6 @@ export const addComment = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getCommentsForPost = async (req: Request, res: Response) => {
   try {
     const postId = parseInt(req.params.postId, 10);
@@ -256,4 +248,3 @@ export const getCommentsForPost = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to retrieve comments" });
   }
 };
-
