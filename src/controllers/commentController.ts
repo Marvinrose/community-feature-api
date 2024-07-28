@@ -52,3 +52,37 @@ export const getCommentsForPost = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to retrieve comments" });
   }
 };
+
+
+export const replyToComment = async (req: Request, res: Response) => {
+  try {
+    const { content } = req.body;
+    const commentId = parseInt(req.params.commentId, 10);
+
+    if (!req.user?.id) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const parentComment = await prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!parentComment) {
+      return res.status(404).json({ error: "Parent comment not found" });
+    }
+
+    const newComment = await prisma.comment.create({
+      data: {
+        content,
+        userId: req.user.id,
+        postId: parentComment.postId,
+        parentId: commentId,
+      },
+    });
+
+    res.status(201).json(newComment);
+  } catch (error) {
+    console.error("Error replying to comment:", error);
+    res.status(500).json({ error: "Failed to reply to comment" });
+  }
+};
